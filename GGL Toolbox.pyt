@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Created:     02/06/2018
+# Created:     02/20/2018
 # ArcGIS version: 10.3.1
 # Python version: 2.7
 
@@ -9,7 +9,7 @@
 # Author:      Matt Helstab
 #
 # Copyright:   (c) jmhelstab 2018
-# Licence:     <your licence>
+# Licence:     GNU General Public License v3.0
 #-------------------------------------------------------------------------------
 
 #Import Modules
