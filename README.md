@@ -1,6 +1,7 @@
 # Geomorphic Grade Line Relative Elevation Model
 ### ArcMap Python Toolbox
 
+![gglrem_thumb](https://user-images.githubusercontent.com/29985018/44356381-0e653a00-a464-11e8-91fb-788c0ebc08dd.png)
 
 ## Getting Started:
 
