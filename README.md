@@ -1,14 +1,14 @@
 # Geomorphic Grade Line Relative Elevation Model
 
-##GGLREM
+## GGLREM
 
-###ArcMap Python Toolbox
+### ArcMap Python Toolbox
 
 
-##Getting Started:
+## Getting Started:
 
--Ensure you have ArcGIS version 10.3 or newer.
--Download the toolbox and place it in the appropriate folder folder.
+- Ensure you have ArcGIS version 10.3 or newer.
+- Download the toolbox and place it in the appropriate folder folder.
 
 
 
