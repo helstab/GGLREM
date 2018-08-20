@@ -7,7 +7,7 @@
 - Ensure you have ArcGIS version 10.3 or newer.
 - Download the toolbox and place it in the appropriate folder folder.
 
-![GGLREM](https://github.com/helstab/GGLREM/edit/master/GGLREMTool.png)
+![gglremtool](https://user-images.githubusercontent.com/29985018/44349484-fb496e80-a451-11e8-8dd1-e9a31d1bb486.png)
 
 ## Report Issues
 
@@ -21,7 +21,7 @@ If the user encounters any problems running the GGLREM tool please email Matt He
 
   This first steps ensures that the users workspace and coordinate system is correctly set before creating a polyline feature class. The     user must then start an edit session and draw their valley centerline. The RouteID field in the Centerline polyline must be named.   
   
-  Insert Image
+  ![step1](https://user-images.githubusercontent.com/29985018/44349907-00f38400-a453-11e8-972f-eb3131e190ed.png)
 
 - Create Cross Sections
 
@@ -29,13 +29,15 @@ If the user encounters any problems running the GGLREM tool please email Matt He
   
   Select Route ID Field and Route ID (ensures proper workflow) and set the distance perpendicular to the centerline you'd like to extend     the cross sections to. Finally, choose the direction you'd like to build cross sections from. 
   
-  Insert Image  
+  ![step2](https://user-images.githubusercontent.com/29985018/44349912-0650ce80-a453-11e8-9058-897cd2206103.png)
 
 - Create GGL Table and Centerline Stations
 
    #### REQUIRED: Routed Centerline feature class; Cross Section feature class; DEM
    
    Input Routed Centeline feature class and the Route ID. Input the Cross Section feature class. Set centerline buffer distance            (*OPTIONAL*). Input DEM.
+   
+   ![step3](https://user-images.githubusercontent.com/29985018/44349921-08b32880-a453-11e8-8fea-8171e86d0d3b.png)
 
 - Create Relative Elevation Model(s)
 
@@ -43,4 +45,4 @@ If the user encounters any problems running the GGLREM tool please email Matt He
 
   Evaluate the GGL Table and choose the model that best fits the project target surfaces. (*A user created model can be used to detrend   the valley*). Choose the output Relative Elevation Model(s) to produce. 
   
-  Insert Picture
+  ![step4](https://user-images.githubusercontent.com/29985018/44349926-0b158280-a453-11e8-8070-067edae73b90.png)
