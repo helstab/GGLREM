@@ -7,7 +7,7 @@
 - Ensure you have ArcGIS version 10.3 or newer.
 - Download the toolbox and place it in the appropriate folder folder.
 
-![GGLREM](https://github.com/helstab/GGLREM/edit/master/GGLREMTool.png)
+![GGLREM](/master/GGLREMTool.png)
 
 ## Report Issues
 
