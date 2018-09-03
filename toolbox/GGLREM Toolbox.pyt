@@ -569,7 +569,7 @@ class REM(object):
         ggl_table = parameters[2].valueAsText
         ggl_field = parameters[3].valueAsText
         lidar = parameters[4].valueAsText
-        rems = parameters[5].values
+        rems = parameters[5].valueAsText
         desc = arcpy.Describe(crosssections)
         gdb = desc.path
         
