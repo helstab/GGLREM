@@ -3,16 +3,16 @@
 # ArcGIS version: 10.5.1
 # Python version: 2.7
 # GGLREM version: 1.0.0
-# First realse: 08/20/2018
+# First release: 08/20/2018
 #
 
 # Name:        GGL REM Toolbox
 # Purpose: Series of tools to build a Relative Elevation Model (REM)
-# based on the Geomorphic Grade Line (GGL). 
+# based on the Geomorphic Grade Line (GGL).
 # Author:      Matt Helstab
 #
 # Copyright:   (c) jmhelstab 2018
-# Licence:     GNU General Public License v3.0
+# License:     GNU General Public License v3.0
 #-------------------------------------------------------------------------------
 
 #Import Modules
@@ -39,7 +39,8 @@ class Centerline(object):
     def __init__(self):
         """Define the tool (tool name is the name of the class)."""
         self.label = "1. Create a Centerline Feature Class"
-        self.description = "Create a polyline Feature Class in the current workspace with expected Fields and Data Types for the Create Cross Section Tool"
+        self.description = "Create a polyline Feature Class in the current
+        workspace with expected Fields and Data Types for the Create Cross Section Tool"
         self.canRunInBackground = False
 
     def getParameterInfo(self):
@@ -72,7 +73,7 @@ class Centerline(object):
             datatype = "GPString",
             parameterType = "Required",
             direction = "Output")
-        
+
         params = [workspaceLOC, geodatabaseLOC, centerCOORD, nameFC]
         return params
 
@@ -97,7 +98,7 @@ class Centerline(object):
         gdb = parameters[1].valueAsText
         dem = parameters[2].valueAsText
         name_fc = parameters[3].valueAsText
-        cl_name = "Centerline_" + name_fc 
+        cl_name = "Centerline_" + name_fc
 
         #Set Workspace Environment and Map Properties
         arcpy.env.overwriteOutput = True
@@ -118,7 +119,7 @@ class Centerline(object):
         arcpy.AddMessage("Adding Centerline Layer")
         Layer_cl_name = arcpy.mapping.Layer(cl_name)
         arcpy.mapping.AddLayer(df, Layer_cl_name)
-        
+
         return
 
 #Create Cross Section Tool Parameters
@@ -126,7 +127,7 @@ class CrossSections(object):
     def __init__(self):
         """Define the tool (tool name is the name of the class)."""
         self.label = "2. Create Cross Sections"
-        self.description = "Create cross section polylines along the valley centerline." 
+        self.description = "Create cross section polylines along the valley centerline."
         self.canRunInBackground = False
 
     def getParameterInfo(self):
@@ -165,7 +166,7 @@ class CrossSections(object):
             datatype = "GPLong",
             parameterType = "Required",
             direction = "Input")
-        
+
         #Fifth parameter [4]
         offRight = arcpy.Parameter(
             displayName = "Input Offset Distance From Right of Centerline",
@@ -173,7 +174,7 @@ class CrossSections(object):
             datatype = "GPLong",
             parameterType = "Required",
             direction = "Input")
-                    
+
        #Sixth parameter [5]
         drawDirection = arcpy.Parameter(
             displayName = "Select Direction to Start Stationing From",
@@ -183,7 +184,7 @@ class CrossSections(object):
             direction = "Input")
         drawDirection.filter.type = "ValueList"
         drawDirection.filter.list = ["UPPER_LEFT", "UPPER_RIGHT", "LOWER_LEFT", "LOWER_RIGHT"]
-        
+
         params = [inFC, route, routeID, offLeft, offRight, drawDirection]
         return params
 
@@ -195,10 +196,10 @@ class CrossSections(object):
         """Modify the values and properties of parameters before internal
         validation is performed.  This method is called whenever a parameter
         has been changed."""
-        if parameters[1].value:  
-            with arcpy.da.SearchCursor(parameters[0].valueAsText, parameters[1].valueAsText) as rows:  
-                parameters[2].filter.list = sorted(list(set([row[0] for row in rows])))  
-        else:  
+        if parameters[1].value:
+            with arcpy.da.SearchCursor(parameters[0].valueAsText, parameters[1].valueAsText) as rows:
+                parameters[2].filter.list = sorted(list(set([row[0] for row in rows])))
+        else:
             parameters[2].filter.list = []
         return
     def updateMessages(self, parameters):
@@ -221,10 +222,10 @@ class CrossSections(object):
         o_right = parameters[4].valueAsText
         draw_dir = parameters[5].valueAsText
         length_id = "LOCATION"
-        fc_routed = "Routed_" + route_id 
-        off_table = "Offset_Table_" + route_id 
-        merged = "Merged_" + route_id 
-        x_sec = "CrossSections_" + route_id  
+        fc_routed = "Routed_" + route_id
+        off_table = "Offset_Table_" + route_id
+        merged = "Merged_" + route_id
+        x_sec = "CrossSections_" + route_id
         desc = arcpy.Describe(fc_in)
         gdb = desc.path
 
@@ -235,10 +236,10 @@ class CrossSections(object):
         arcpy.env.workspace = gdb
         mxd = arcpy.mapping.MapDocument("CURRENT")
         df = arcpy.mapping.ListDataFrames(mxd)[0]
-        
+
         # Process: Create Routes
-        arcpy.CreateRoutes_lr(fc_in, route_field, fc_routed, "LENGTH", "", "", draw_dir, "", "", "IGNORE", "INDEX") 
-        
+        arcpy.CreateRoutes_lr(fc_in, route_field, fc_routed, "LENGTH", "", "", draw_dir, "", "", "IGNORE", "INDEX")
+
         #Create Table
         arcpy.CreateTable_management(gdb, off_table)
 
@@ -255,7 +256,7 @@ class CrossSections(object):
         LENGTH = int(LOCATION1)
         LOCATION2 = range(1,LENGTH)
 
-        NAME =  arcpy.da.SearchCursor(fc_in, route_field,)  
+        NAME =  arcpy.da.SearchCursor(fc_in, route_field,)
         NAME = [NAME] * LENGTH
 
         #Append Extracted Values to Offset_Table
@@ -299,7 +300,7 @@ class CenterlineStations(object):
         self.canRunInBackground = False
 
     def getParameterInfo(self):
-        #First parameter 
+        #First parameter
         inFC1 = arcpy.Parameter(
             displayName = "Input Routed Centerline Feature Class",
             name = "InputCenterlineRouted",
@@ -307,7 +308,7 @@ class CenterlineStations(object):
             parameterType = "Required",
             direction = "Input")
 
-        #Second parameter 
+        #Second parameter
         routeID = arcpy.Parameter(
             displayName = "Select Centerline Route ID",
             name = "RouteID",
@@ -317,7 +318,7 @@ class CenterlineStations(object):
         routeID.filter.type = "ValueList"
         routeID.filter.list = []
 
-        #Third parameter        
+        #Third parameter
         inFC2 = arcpy.Parameter(
             displayName = "Input Cross Section Feature Class",
             name = "InputCrossSection",
@@ -325,7 +326,7 @@ class CenterlineStations(object):
             parameterType = "Required",
             direction = "Input")
 
-        #Fourth parameter 
+        #Fourth parameter
         buffer = arcpy.Parameter(
             displayName = "Input Centerline Buffer Distance",
             name = "buffer",
@@ -333,7 +334,7 @@ class CenterlineStations(object):
             parameterType = "Required",
             direction = "Input")
 
-        #Fifth parameter        
+        #Fifth parameter
         inRASTER = arcpy.Parameter(
             displayName = "Input LiDAR Digital Elevation Model",
             name = "InputLidar",
@@ -349,10 +350,10 @@ class CenterlineStations(object):
         return True
 
     def updateParameters(self, parameters):
-        if parameters[0].value:  
-            with arcpy.da.SearchCursor(parameters[0].valueAsText, "ROUTEID") as rows:  
-                parameters[1].filter.list = [row[0] for row in rows]  
-        else:  
+        if parameters[0].value:
+            with arcpy.da.SearchCursor(parameters[0].valueAsText, "ROUTEID") as rows:
+                parameters[1].filter.list = [row[0] for row in rows]
+        else:
             parameters[1].filter.list = []
 
         return
@@ -394,7 +395,7 @@ class CenterlineStations(object):
         arcpy.Intersect_analysis(inFeatures, "xsec", "", "", "POINT")
 
         arcpy.MultipartToSinglepart_management("xsec", "xsec2")
-                
+
         #Extract elevation data from DEM to Centerline Station Points
         arcpy.sa.ExtractValuesToPoints("xsec2", raster, stations, "INTERPOLATE")
 
@@ -419,7 +420,7 @@ class CenterlineStations(object):
         arcpy.Delete_management("center_buff")
         arcpy.Delete_management("clip_xsec_raster")
         arcpy.Delete_management("xsec_clipped_points")
-                
+
         #Add Layers
         Layer_stations = arcpy.mapping.Layer(stations)
         arcpy.mapping.AddLayer(df, Layer_stations)
@@ -437,7 +438,7 @@ class CenterlineStations(object):
         #Linear Model
         polyfit_1 = numpy.polyfit(px, py, 1)
         p1 = numpy.polyval(polyfit_1, px)
-       
+
         #Second Order
         polyfit_2 = numpy.polyfit(px, py, 2)
         p2 = numpy.polyval(polyfit_2, px)
@@ -445,7 +446,7 @@ class CenterlineStations(object):
         #Third Order
         polyfit_3 = numpy.polyfit(px, py, 3)
         p3 = numpy.polyval(polyfit_3, px)
-        
+
         #Fourth Order
         polyfit_4= numpy.polyfit(px, py, 4)
         p4 = numpy.polyval(polyfit_4, px)
@@ -460,7 +461,7 @@ class CenterlineStations(object):
 
         ##Build Blank Structured Array
         poly = numpy.zeros(len(px), dtype=dt)
-        
+
         ##Add values to Structured Array
         poly['LOCATION'] = px
         poly['LIDAR'] = py
@@ -476,7 +477,7 @@ class CenterlineStations(object):
         #Create a .cvs table for model evaluation in R Studio
         fm_fields = ["LOCATION", "LIDAR", "LINEAR", "POLY2", "POLY3", "POLY4", "POLY5"]
         arcpy.TableToTable_conversion(out_table, dir, csv)
-        
+
         #Join Model Output to Cross Sections and Centerline Stations Feature Classes
         arcpy.JoinField_management(stations, "LOCATION", table_name, "LOCATION", ["LIDAR", "LINEAR", "POLY2", "POLY3", "POLY4", "POLY5"])
         arcpy.JoinField_management(crosssection, "LOCATION", table_name, "LOCATION", ["LIDAR", "LINEAR", "POLY2", "POLY3", "POLY4", "POLY5"])
@@ -490,7 +491,7 @@ class REM(object):
         self.canRunInBackground = False
 
     def getParameterInfo(self):
-        #First parameter 
+        #First parameter
         inFC = arcpy.Parameter(
             displayName = "Input Cross Section Feature Class",
             name = "InputCrossSections",
@@ -498,7 +499,7 @@ class REM(object):
             parameterType = "Required",
             direction = "Input")
 
-        #Second parameter 
+        #Second parameter
         gglLIST = arcpy.Parameter(
             displayName = "Select Values/Model to Construct Relative Eleavtion Model",
             name = "GglList",
@@ -509,7 +510,7 @@ class REM(object):
         gglLIST.filter.type = "ValueList"
         gglLIST.filter.list = ["Custom", "LiDAR", "Linear Model", "Polynomial 2nd", "Polynomial 3rd", "Polynomial 4th", "Polynomial 5th"]
 
-        #Third parameter 
+        #Third parameter
         gglCUST = arcpy.Parameter(
             displayName = "Input Custom GGL Table",
             name = "CustomGglTable",
@@ -517,7 +518,7 @@ class REM(object):
             parameterType = "Optional",
             direction = "Input")
 
-        #Fourth parameter                 
+        #Fourth parameter
         gglFIELD = arcpy.Parameter(
             displayName = "Select Field with GGL Values for Detrending",
             name = "CustomGglField",
@@ -527,7 +528,7 @@ class REM(object):
         gglFIELD.filter.list =[]
         gglFIELD.parameterDependencies = [gglCUST.name]
 
-        #Fifth parameter 
+        #Fifth parameter
         inDEM = arcpy.Parameter(
             displayName = "Input LiDAR DEM",
             name = "InputLidar",
@@ -535,7 +536,7 @@ class REM(object):
             parameterType = "Required",
             direction = "Input")
 
-        #Sixth parameter 
+        #Sixth parameter
         outREM = arcpy.Parameter(
             displayName = "Output Relative Elevation Model(s)",
             name = "OutputREM",
@@ -554,7 +555,7 @@ class REM(object):
         return True
 
     def updateParameters(self, parameters):
-      
+
         return
 
     def updateMessages(self, parameters):
@@ -572,7 +573,7 @@ class REM(object):
         rems = parameters[5].valueAsText
         desc = arcpy.Describe(crosssections)
         gdb = desc.path
-        
+
         #Set Workspace Environment and Map Properties
         arcpy.env.overwriteOutput = True
         arcpy.env.addOutputsToMap = False
@@ -700,5 +701,3 @@ class REM(object):
         arcpy.Delete_management("Poly5")
 
         return
-    
-        
