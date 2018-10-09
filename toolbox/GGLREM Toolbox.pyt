@@ -3,7 +3,7 @@
 # ArcGIS version: 10.5.1
 # Python version: 2.7
 # GGLREM version: 1.0.0
-# First release: 08/20/2018
+# First realse: 08/20/2018
 #
 
 # Name:        GGL REM Toolbox
@@ -12,7 +12,7 @@
 # Author:      Matt Helstab
 #
 # Copyright:   (c) jmhelstab 2018
-# License:     GNU General Public License v3.0
+# Licence:     GNU General Public License v3.0
 #-------------------------------------------------------------------------------
 
 #Import Modules
@@ -39,8 +39,7 @@ class Centerline(object):
     def __init__(self):
         """Define the tool (tool name is the name of the class)."""
         self.label = "1. Create a Centerline Feature Class"
-        self.description = "Create a polyline Feature Class in the current
-        workspace with expected Fields and Data Types for the Create Cross Section Tool"
+        self.description = "Create a polyline Feature Class in the current workspace with expected Fields and Data Types for the Create Cross Section Tool"
         self.canRunInBackground = False
 
     def getParameterInfo(self):
@@ -326,13 +325,23 @@ class CenterlineStations(object):
             parameterType = "Required",
             direction = "Input")
 
+        bufferBOOLEAN = arcpy.Parameter(
+            displayName = "Include Centerline Buffer Distance?",
+            name = "bufferBoolean",
+            datatype = "GPString",
+            parameterType = "Required",
+            direction = "Input")
+        bufferBOOLEAN.filter.type = "ValueList"
+        bufferBOOLEAN.filter.list = ["Yes", "No"]
+
         #Fourth parameter
         buffer = arcpy.Parameter(
             displayName = "Input Centerline Buffer Distance",
             name = "buffer",
             datatype = "GPLong",
-            parameterType = "Required",
+            parameterType = "Optional",
             direction = "Input")
+        buffer.value = "1"
 
         #Fifth parameter
         inRASTER = arcpy.Parameter(
@@ -342,7 +351,7 @@ class CenterlineStations(object):
             parameterType = "Required",
             direction = "Input")
 
-        params = [inFC1, routeID, inFC2, buffer, inRASTER]
+        params = [inFC1, routeID, inFC2, bufferBOOLEAN, buffer, inRASTER]
         return params
 
     def isLicensed(self):
@@ -356,14 +365,24 @@ class CenterlineStations(object):
         else:
             parameters[1].filter.list = []
 
+        if parameters[3].value == "Yes":
+            parameters[4].enabled = True
+            parameters[4].parameterType = "Required"
+        else:
+            parameters[4].enabled = False
+            parameters[4].parameterType = "Optional"
+            parameters[4].value = "1"
+
+
+
         return
 
     def updateMessages(self, parameters):
         """Modify the messages created by internal validation for each tool
         parameter.  This method is called after internal validation."""
-        if parameters[3].altered:
-            if parameters[3].value <= 0:
-                parameters[3].setErrorMessage('''Buffer Value must be an integer greater than zero.''')
+        if parameters[4].altered:
+            if parameters[4].value <= 0:
+                parameters[4].setErrorMessage('''Buffer Value must be an integer greater than zero.''')
         return
 
     def execute(self, parameters, messages):
@@ -372,17 +391,21 @@ class CenterlineStations(object):
         centerroute = parameters[0].valueAsText
         routeid = parameters[1].valueAsText
         crosssection = parameters[2].valueAsText
-        buffer = parameters[3].valueAsText
-        raster = parameters[4].valueAsText
+        bufferboolean = parameters[3].valueAsText
+        buffer = parameters[4].valueAsText
+        raster = parameters[5].valueAsText
         table_name = "GGL_Table_" + routeid
+        buf_table_name = "GGLBUF_Table_" + routeid
         stations = "Stations_" + routeid
         clip_crosssection = crosssection + "_clipped"
         inFeatures = [centerroute, crosssection]
         desc = arcpy.Describe(centerroute)
         gdb = desc.path
         out_table = gdb + "/" + "GGL_Table_" + routeid
+        out_table_buf = gdb + "/" + "GGLBUF_Table_" + routeid
         dir = os.path.dirname(gdb)
         csv = table_name + ".csv"
+        csv_buff = buf_table_name + ".csv"
 
         #Set Workspace Environment and Map Properties
         arcpy.env.overwriteOutput = True
@@ -391,96 +414,194 @@ class CenterlineStations(object):
         mxd = arcpy.mapping.MapDocument("CURRENT")
         df = arcpy.mapping.ListDataFrames(mxd)[0]
 
-        #Creating Centerling Stations Point Feature Class
-        arcpy.Intersect_analysis(inFeatures, "xsec", "", "", "POINT")
+        if "No" in bufferboolean:
+            arcpy.Intersect_analysis(inFeatures, "xsec", "", "", "POINT")
 
-        arcpy.MultipartToSinglepart_management("xsec", "xsec2")
+            arcpy.MultipartToSinglepart_management("xsec", "xsec2")
 
-        #Extract elevation data from DEM to Centerline Station Points
-        arcpy.sa.ExtractValuesToPoints("xsec2", raster, stations, "INTERPOLATE")
+            #Extract elevation data from DEM to Centerline Station Points
+            arcpy.sa.ExtractValuesToPoints("xsec2", raster, stations, "INTERPOLATE")
 
-        #Buffer Centerline
-        arcpy.Buffer_analysis(centerroute, "center_buff", buffer, "FULL", "FLAT", "ALL", "", "")
+            #Buffer Centerline
+            ##arcpy.Buffer_analysis(centerroute, "center_buff", buffer, "FULL", "FLAT", "ALL", "", "")
 
-        #Clip Cross Sections to Centerline Buffer
-        arcpy.Clip_analysis(crosssection, "center_buff", clip_crosssection, "")
+            #Clip Cross Sections to Centerline Buffer
+            ##arcpy.Clip_analysis(crosssection, "center_buff", clip_crosssection, "")
 
-        #Convert Clipped Cross Sections to Raster
-        arcpy.PolylineToRaster_conversion(clip_crosssection, "LOCATION", "clip_xsec_raster", "", "LOCATION", "1")
+            #Convert Cross Sections to Raster
+            ##arcpy.PolylineToRaster_conversion(clip_crosssection, "LOCATION", "clip_xsec_raster", "", "LOCATION", "1")
 
-        #Convert Clipped Cross SEction Raster to Points
-        arcpy.RasterToPoint_conversion("clip_xsec_raster", "xsec_clipped_points", "VALUE")
+            #Convert Clipped Cross SEction Raster to Points
+            ##arcpy.RasterToPoint_conversion("clip_xsec_raster", "xsec_clipped_points", "VALUE")
 
-        #Extract elevation data from DEM to Clipped Cross Section Station Points
-        arcpy.sa.ExtractValuesToPoints("xsec_clipped_points", raster, "xsec_stations", "INTERPOLATE")
+            #Extract elevation data from DEM to Clipped Cross Section Station Points
+            ##arcpy.sa.ExtractValuesToPoints("xsec_clipped_points", raster, "xsec_stations", "INTERPOLATE")
 
-        #Delete Unneeded Feature Classes
-        arcpy.Delete_management("xsec")
-        arcpy.Delete_management("xsec2")
-        arcpy.Delete_management("center_buff")
-        arcpy.Delete_management("clip_xsec_raster")
-        arcpy.Delete_management("xsec_clipped_points")
+            #Delete Unneeded Feature Classes
+            arcpy.Delete_management("xsec")
+            arcpy.Delete_management("xsec2")
+            ##arcpy.Delete_management("center_buff")
+            ##arcpy.Delete_management("clip_xsec_raster")
+            ##arcpy.Delete_management("xsec_clipped_points")
 
-        #Add Layers
-        Layer_stations = arcpy.mapping.Layer(stations)
-        arcpy.mapping.AddLayer(df, Layer_stations)
+            #Add Layers
+            Layer_stations = arcpy.mapping.Layer(stations)
+            arcpy.mapping.AddLayer(df, Layer_stations)
 
-        #Centerline Model Building
-        ##Extract Values to evalue centelline slope
-        px = [row[0] for row in arcpy.da.SearchCursor("xsec_stations", "grid_code")]
-        py = [row[0] for row in arcpy.da.SearchCursor("xsec_stations", "RASTERVALU")]
+            #Centerline Model Building
+            ##Extract Values to evalue centelline slope
+            px = [row[0] for row in arcpy.da.SearchCursor(stations, "LOCATION")]
+            py = [row[0] for row in arcpy.da.SearchCursor(stations, "RASTERVALU")]
 
-        p_2 = numpy.power(px, 2)
-        p_3 = numpy.power(px, 3)
-        p_4 = numpy.power(px, 4)
-        p_5 = numpy.power(px, 5)
+            p_2 = numpy.power(px, 2)
+            p_3 = numpy.power(px, 3)
+            p_4 = numpy.power(px, 4)
+            p_5 = numpy.power(px, 5)
 
-        #Linear Model
-        polyfit_1 = numpy.polyfit(px, py, 1)
-        p1 = numpy.polyval(polyfit_1, px)
+            #Linear Model
+            polyfit_1 = numpy.polyfit(px, py, 1)
+            p1 = numpy.polyval(polyfit_1, px)
 
-        #Second Order
-        polyfit_2 = numpy.polyfit(px, py, 2)
-        p2 = numpy.polyval(polyfit_2, px)
+            #Second Order
+            polyfit_2 = numpy.polyfit(px, py, 2)
+            p2 = numpy.polyval(polyfit_2, px)
 
-        #Third Order
-        polyfit_3 = numpy.polyfit(px, py, 3)
-        p3 = numpy.polyval(polyfit_3, px)
+            #Third Order
+            polyfit_3 = numpy.polyfit(px, py, 3)
+            p3 = numpy.polyval(polyfit_3, px)
 
-        #Fourth Order
-        polyfit_4= numpy.polyfit(px, py, 4)
-        p4 = numpy.polyval(polyfit_4, px)
+            #Fourth Order
+            polyfit_4= numpy.polyfit(px, py, 4)
+            p4 = numpy.polyval(polyfit_4, px)
 
-        #Fifth Order
-        polyfit_5= numpy.polyfit(px, py, 5)
-        p5 = numpy.polyval(polyfit_5, px)
+            #Fifth Order
+            polyfit_5= numpy.polyfit(px, py, 5)
+            p5 = numpy.polyval(polyfit_5, px)
 
-        #Build Structured Array
-        ##Set Data Types
-        dt = {'names':['LOCATION','LIDAR', 'LINEAR', 'POLY2', 'POLY3', 'POLY4', 'POLY5'], 'formats':[numpy.int, numpy.float32, numpy.float32, numpy.float32, numpy.float32, numpy.float32, numpy.float32]}
+            #Build Structured Array
+            ##Set Data Types
+            dt = {'names':['LOCATION','LIDAR', 'LINEAR', 'POLY2', 'POLY3', 'POLY4', 'POLY5'], 'formats':[numpy.int, numpy.float32, numpy.float32, numpy.float32, numpy.float32, numpy.float32, numpy.float32]}
 
-        ##Build Blank Structured Array
-        poly = numpy.zeros(len(px), dtype=dt)
+            ##Build Blank Structured Array
+            poly = numpy.zeros(len(px), dtype=dt)
 
-        ##Add values to Structured Array
-        poly['LOCATION'] = px
-        poly['LIDAR'] = py
-        poly['LINEAR'] = p1
-        poly['POLY2'] = p2
-        poly['POLY3'] = p3
-        poly['POLY4'] = p4
-        poly['POLY5'] = p5
+            ##Add values to Structured Array
+            poly['LOCATION'] = px
+            poly['LIDAR'] = py
+            poly['LINEAR'] = p1
+            poly['POLY2'] = p2
+            poly['POLY3'] = p3
+            poly['POLY4'] = p4
+            poly['POLY5'] = p5
 
-        #Convert Structured Array to Table
-        arcpy.da.NumPyArrayToTable(poly, out_table)
+            #Convert Structured Array to Table
+            arcpy.da.NumPyArrayToTable(poly, out_table)
 
-        #Create a .cvs table for model evaluation in R Studio
-        fm_fields = ["LOCATION", "LIDAR", "LINEAR", "POLY2", "POLY3", "POLY4", "POLY5"]
-        arcpy.TableToTable_conversion(out_table, dir, csv)
+            #Create a .cvs table for model evaluation in R Studio
+            fm_fields = ["LOCATION", "LIDAR", "LINEAR", "POLY2", "POLY3", "POLY4", "POLY5"]
+            arcpy.TableToTable_conversion(out_table, dir, csv)
 
-        #Join Model Output to Cross Sections and Centerline Stations Feature Classes
-        arcpy.JoinField_management(stations, "LOCATION", table_name, "LOCATION", ["LIDAR", "LINEAR", "POLY2", "POLY3", "POLY4", "POLY5"])
-        arcpy.JoinField_management(crosssection, "LOCATION", table_name, "LOCATION", ["LIDAR", "LINEAR", "POLY2", "POLY3", "POLY4", "POLY5"])
+            #Join Model Output to Cross Sections and Centerline Stations Feature Classes
+            arcpy.JoinField_management(stations, "LOCATION", out_table, "LOCATION", ["LIDAR", "LINEAR", "POLY2", "POLY3", "POLY4", "POLY5"])
+            arcpy.JoinField_management(crosssection, "LOCATION", out_table, "LOCATION", ["LIDAR", "LINEAR", "POLY2", "POLY3", "POLY4", "POLY5"])
+
+        else:
+            #Creating Centerling Stations Point Feature Class
+            arcpy.Intersect_analysis(inFeatures, "xsec", "", "", "POINT")
+
+            arcpy.MultipartToSinglepart_management("xsec", "xsec2")
+
+            #Extract elevation data from DEM to Centerline Station Points
+            arcpy.sa.ExtractValuesToPoints("xsec2", raster, stations, "INTERPOLATE")
+
+            #Buffer Centerline
+            arcpy.Buffer_analysis(centerroute, "center_buff", buffer, "FULL", "FLAT", "ALL", "", "")
+
+            #Clip Cross Sections to Centerline Buffer
+            arcpy.Clip_analysis(crosssection, "center_buff", clip_crosssection, "")
+
+            #Convert Clipped Cross Sections to Raster
+            arcpy.PolylineToRaster_conversion(clip_crosssection, "LOCATION", "clip_xsec_raster", "", "LOCATION", "1")
+
+            #Convert Clipped Cross SEction Raster to Points
+            arcpy.RasterToPoint_conversion("clip_xsec_raster", "xsec_clipped_points", "VALUE")
+
+            #Extract elevation data from DEM to Clipped Cross Section Station Points
+            arcpy.sa.ExtractValuesToPoints("xsec_clipped_points", raster, "xsec_stations", "INTERPOLATE")
+
+            #Delete Unneeded Feature Classes
+            arcpy.Delete_management("xsec")
+            arcpy.Delete_management("xsec2")
+            arcpy.Delete_management("center_buff")
+            arcpy.Delete_management("clip_xsec_raster")
+            arcpy.Delete_management("xsec_clipped_points")
+
+            #Add Layers
+            Layer_stations = arcpy.mapping.Layer(stations)
+            arcpy.mapping.AddLayer(df, Layer_stations)
+
+            #Centerline Model Building
+            ##Extract Values to evalue centelline slope
+            px = [row[0] for row in arcpy.da.SearchCursor("xsec_stations", "grid_code")]
+            py = [row[0] for row in arcpy.da.SearchCursor("xsec_stations", "RASTERVALU")]
+
+            p_2 = numpy.power(px, 2)
+            p_3 = numpy.power(px, 3)
+            p_4 = numpy.power(px, 4)
+            p_5 = numpy.power(px, 5)
+
+            #Linear Model
+            polyfit_1 = numpy.polyfit(px, py, 1)
+            p1 = numpy.polyval(polyfit_1, px)
+
+            #Second Order
+            polyfit_2 = numpy.polyfit(px, py, 2)
+            p2 = numpy.polyval(polyfit_2, px)
+
+            #Third Order
+            polyfit_3 = numpy.polyfit(px, py, 3)
+            p3 = numpy.polyval(polyfit_3, px)
+
+            #Fourth Order
+            polyfit_4= numpy.polyfit(px, py, 4)
+            p4 = numpy.polyval(polyfit_4, px)
+
+            #Fifth Order
+            polyfit_5= numpy.polyfit(px, py, 5)
+            p5 = numpy.polyval(polyfit_5, px)
+
+            #Build Structured Array
+            ##Set Data Types
+            dt = {'names':['LOCATION','LIDAR', 'LINEAR', 'POLY2', 'POLY3', 'POLY4', 'POLY5'], 'formats':[numpy.int, numpy.float32, numpy.float32, numpy.float32, numpy.float32, numpy.float32, numpy.float32]}
+
+            ##Build Blank Structured Array
+            poly = numpy.zeros(len(px), dtype=dt)
+
+            ##Add values to Structured Array
+            poly['LOCATION'] = px
+            poly['LIDAR'] = py
+            poly['LINEAR'] = p1
+            poly['POLY2'] = p2
+            poly['POLY3'] = p3
+            poly['POLY4'] = p4
+            poly['POLY5'] = p5
+
+            #Convert Structured Array to Table
+            arcpy.da.NumPyArrayToTable(poly, out_table_buf)
+
+            #Create a .cvs table for model evaluation in R Studio
+            fm_fields = ["LOCATION", "LIDAR", "LINEAR", "POLY2", "POLY3", "POLY4", "POLY5"]
+            arcpy.TableToTable_conversion(out_table_buf, dir, csv_buff)
+
+            #Join Model Output to Cross Sections and Centerline Stations Feature Classes
+            arcpy.JoinField_management(stations, "LOCATION", out_table_buf, "LOCATION", ["LIDAR", "LINEAR", "POLY2", "POLY3", "POLY4", "POLY5"])
+            arcpy.JoinField_management(crosssection, "LOCATION", out_table_buf, "LOCATION", ["LIDAR", "LINEAR", "POLY2", "POLY3", "POLY4", "POLY5"])
+
+            #Delete Unneeded Feature Classes
+            arcpy.Delete_management("xsec_stations")
+
+
+
         return
 
 class REM(object):
@@ -492,6 +613,14 @@ class REM(object):
 
     def getParameterInfo(self):
         #First parameter
+        inNAME = arcpy.Parameter(
+            displayName = "Input Unique GGLREM Name",
+            name = "GGLREMname",
+            datatype = ["GPString"],
+            parameterType = "Required",
+            direction = "Input")
+
+        #Second parameter
         inFC = arcpy.Parameter(
             displayName = "Input Cross Section Feature Class",
             name = "InputCrossSections",
@@ -499,7 +628,7 @@ class REM(object):
             parameterType = "Required",
             direction = "Input")
 
-        #Second parameter
+        #Third parameter
         gglLIST = arcpy.Parameter(
             displayName = "Select Values/Model to Construct Relative Eleavtion Model",
             name = "GglList",
@@ -510,7 +639,7 @@ class REM(object):
         gglLIST.filter.type = "ValueList"
         gglLIST.filter.list = ["Custom", "LiDAR", "Linear Model", "Polynomial 2nd", "Polynomial 3rd", "Polynomial 4th", "Polynomial 5th"]
 
-        #Third parameter
+        #Fourth parameter
         gglCUST = arcpy.Parameter(
             displayName = "Input Custom GGL Table",
             name = "CustomGglTable",
@@ -518,7 +647,7 @@ class REM(object):
             parameterType = "Optional",
             direction = "Input")
 
-        #Fourth parameter
+        #Fifth parameter
         gglFIELD = arcpy.Parameter(
             displayName = "Select Field with GGL Values for Detrending",
             name = "CustomGglField",
@@ -528,7 +657,7 @@ class REM(object):
         gglFIELD.filter.list =[]
         gglFIELD.parameterDependencies = [gglCUST.name]
 
-        #Fifth parameter
+        #Sixth parameter
         inDEM = arcpy.Parameter(
             displayName = "Input LiDAR DEM",
             name = "InputLidar",
@@ -536,7 +665,7 @@ class REM(object):
             parameterType = "Required",
             direction = "Input")
 
-        #Sixth parameter
+        #Seventh parameter
         outREM = arcpy.Parameter(
             displayName = "Output Relative Elevation Model(s)",
             name = "OutputREM",
@@ -545,9 +674,9 @@ class REM(object):
             direction = "Input",
             multiValue = "True")
         outREM.filter.type = "ValueList"
-        outREM.filter.list = ["Integer_Meters", "Integer_Decimeters", "Integer_Feet"]
+        outREM.filter.list = ["Integer_Meters", "Integer_Decimeters", "Integer_Feet", "Float_Feet"]
 
-        params = [inFC, gglLIST, gglCUST, gglFIELD, inDEM, outREM]
+        params = [inNAME, inFC, gglLIST, gglCUST, gglFIELD, inDEM, outREM]
         return params
 
     def isLicensed(self):
@@ -565,12 +694,13 @@ class REM(object):
 
     def execute(self, parameters, messages):
         #Set local variables
-        crosssections = parameters[0].valueAsText
-        detrend = parameters[1].valueAsText
-        ggl_table = parameters[2].valueAsText
-        ggl_field = parameters[3].valueAsText
-        lidar = parameters[4].valueAsText
-        rems = parameters[5].valueAsText
+        gglrem_name = parameters[0].valueAsText
+        crosssections = parameters[1].valueAsText
+        detrend = parameters[2].valueAsText
+        ggl_table = parameters[3].valueAsText
+        ggl_field = parameters[4].valueAsText
+        lidar = parameters[5].valueAsText
+        rems = parameters[6].valueAsText
         desc = arcpy.Describe(crosssections)
         gdb = desc.path
 
@@ -582,118 +712,178 @@ class REM(object):
         df = arcpy.mapping.ListDataFrames(mxd)[0]
 
         #REM in Float Meters
-        if "LiDAR" in detrend:
-                arcpy.PolylineToRaster_conversion(crosssections, "LIDAR", "Centerline", "", "", "1")
-                arcpy.Minus_3d(lidar, "Centerline", "Detrended_LiDAR_Float_m")
+        if "Custom" in detrend:
+                arcpy.CopyRows_management(ggl_table, "ggl_table_custom")
+                arcpy.JoinField_management(crosssections, "LOCATION", "ggl_table_custom", "LOCATION", ggl_field)
+                arcpy.PolylineToRaster_conversion(crosssections, ggl_field, "Custom", "", "", "1")
+                arcpy.Minus_3d(lidar, "Custom", gglrem_name + "_Detrended_Custom_Float_m")
                 if "Integer_Meters" in rems:
-                    int_m = Int(Raster("Detrended_LiDAR_Float_m"))
-                    int_m.save("Detrended_LiDAR_Int_m")
-                    Layer_GGLREM_Int_M = arcpy.mapping.Layer("Detrended_LiDAR_Int_m")
+                    int_m = Int(Raster(gglrem_name + "_Detrended_Custom_Float_m"))
+                    int_m.save(gglrem_name + "_Detrended_Custom_Int_m")
+                    Layer_GGLREM_Int_M = arcpy.mapping.Layer(gglrem_name + "_Detrended_Custom_Int_m")
                     arcpy.mapping.AddLayer(df, Layer_GGLREM_Int_M)
                 if "Integer_Decimeters" in rems:
-                    deci_m = (Int(Raster("Detrended_LiDAR_Float_m") * 10 ))
-                    deci_m.save("Detrended_LiDAR_Int_DeciM")
-                    Layer_GGLREM_DeciM = arcpy.mapping.Layer("Detrended_LiDAR_Int_DeciM")
+                    deci_m = (Int(Raster(gglrem_name + "_Detrended_Custom_Float_m") * 10 ))
+                    deci_m.save(gglrem_name + "_Detrended_Custom_Int_DeciM")
+                    Layer_GGLREM_DeciM = arcpy.mapping.Layer(gglrem_name + "_Detrended_Custom_Int_DeciM")
                     arcpy.mapping.AddLayer(df, Layer_GGLREM_DeciM)
                 if "Integer_Feet" in rems:
-                    int_ft = Int(Raster("Detrended_LiDAR_Float_m") * 3.28084)
-                    int_ft.save("Detrended_LiDAR_Int_Ft")
-                    Layer_GGLREM_Int_Ft = arcpy.mapping.Layer("Detrended_LiDAR_Int_Ft")
+                    int_ft = Int(Raster(gglrem_name + "_Detrended_Custom_Float_m") * 3.28084)
+                    int_ft.save(gglrem_name + "_Detrended_Custom_Int_Ft")
+                    Layer_GGLREM_Int_Ft = arcpy.mapping.Layer(gglrem_name + "_Detrended_Custom_Int_Ft")
                     arcpy.mapping.AddLayer(df, Layer_GGLREM_Int_Ft)
+                if "Float_Feet" in rems:
+                    flt_ft = Int(Raster(gglrem_name + "_Detrended_Custom_Float_m") * 3.28084)
+                    flt_ft.save(gglrem_name + "_Detrended_Custom_Flt_Ft")
+                    Layer_GGLREM_Flt_Ft = arcpy.mapping.Layer(gglrem_name + "_Detrended_Custom_Flt_Ft")
+                    arcpy.mapping.AddLayer(df, Layer_GGLREM_Flt_Ft)
+        if "LiDAR" in detrend:
+                arcpy.PolylineToRaster_conversion(crosssections, "LIDAR", "Lidar", "", "", "1")
+                arcpy.Minus_3d(lidar, "Lidar", gglrem_name + "_Detrended_LiDAR_Float_m")
+                if "Integer_Meters" in rems:
+                    int_m = Int(Raster(gglrem_name + "_Detrended_LiDAR_Float_m"))
+                    int_m.save(gglrem_name + "_Detrended_LiDAR_Int_m")
+                    Layer_GGLREM_Int_M = arcpy.mapping.Layer(gglrem_name + "_Detrended_LiDAR_Int_m")
+                    arcpy.mapping.AddLayer(df, Layer_GGLREM_Int_M)
+                if "Integer_Decimeters" in rems:
+                    deci_m = (Int(Raster(gglrem_name + "_Detrended_LiDAR_Float_m") * 10 ))
+                    deci_m.save(gglrem_name + "_Detrended_LiDAR_Int_DeciM")
+                    Layer_GGLREM_DeciM = arcpy.mapping.Layer(gglrem_name + "_Detrended_LiDAR_Int_DeciM")
+                    arcpy.mapping.AddLayer(df, Layer_GGLREM_DeciM)
+                if "Integer_Feet" in rems:
+                    int_ft = Int(Raster(gglrem_name + "_Detrended_LiDAR_Float_m") * 3.28084)
+                    int_ft.save(gglrem_name + "_Detrended_LiDAR_Int_Ft")
+                    Layer_GGLREM_Int_Ft = arcpy.mapping.Layer(gglrem_name + "_Detrended_LiDAR_Int_Ft")
+                    arcpy.mapping.AddLayer(df, Layer_GGLREM_Int_Ft)
+                if "Float_Feet" in rems:
+                    flt_ft = Int(Raster(gglrem_name + "_Detrended_LiDAR_Float_m") * 3.28084)
+                    flt_ft.save(gglrem_name + "_Detrended_LiDAR_Flt_Ft")
+                    Layer_GGLREM_Flt_Ft = arcpy.mapping.Layer(gglrem_name + "_Detrended_LiDAR_Flt_Ft")
+                    arcpy.mapping.AddLayer(df, Layer_GGLREM_Flt_Ft)
+
         if "Linear Model" in detrend:
                 arcpy.PolylineToRaster_conversion(crosssections, "LINEAR", "Linear", "", "", "1")
-                arcpy.Minus_3d(lidar, "Linear", "Detrended_Linear_Float_m")
+                arcpy.Minus_3d(lidar, "Linear", gglrem_name + "_Detrended_Linear_Float_m")
                 if "Integer_Meters" in rems:
-                    int_m = Int(Raster("Detrended_Linear_Float_m"))
-                    int_m.save("Detrended_Linear_Int_m")
-                    Layer_GGLREM_Int_M = arcpy.mapping.Layer("Detrended_Linear_Int_m")
+                    int_m = Int(Raster(gglrem_name + "_Detrended_Linear_Float_m"))
+                    int_m.save(gglrem_name + "_Detrended_Linear_Int_m")
+                    Layer_GGLREM_Int_M = arcpy.mapping.Layer(gglrem_name + "_Detrended_Linear_Int_m")
                     arcpy.mapping.AddLayer(df, Layer_GGLREM_Int_M)
                 if "Integer_Decimeters" in rems:
-                    deci_m = (Int(Raster("Detrended_Linear_Float_m") * 10 ))
-                    deci_m.save("Detrended_Linear_Int_DeciM")
-                    Layer_GGLREM_DeciM = arcpy.mapping.Layer("Detrended_Linear_Int_DeciM")
+                    deci_m = (Int(Raster(gglrem_name + "_Detrended_Linear_Float_m") * 10 ))
+                    deci_m.save(gglrem_name + "_Detrended_Linear_Int_DeciM")
+                    Layer_GGLREM_DeciM = arcpy.mapping.Layer(gglrem_name + "_Detrended_Linear_Int_DeciM")
                     arcpy.mapping.AddLayer(df, Layer_GGLREM_DeciM)
                 if "Integer_Feet" in rems:
-                    int_ft = Int(Raster("Detrended_Linear_Float_m") * 3.28084)
-                    int_ft.save("Detrended_Linear_Int_Ft")
-                    Layer_GGLREM_Int_Ft = arcpy.mapping.Layer("Detrended_Linear_Int_Ft")
+                    int_ft = Int(Raster(gglrem_name + "_Detrended_Linear_Float_m") * 3.28084)
+                    int_ft.save(gglrem_name + "_Detrended_Linear_Int_Ft")
+                    Layer_GGLREM_Int_Ft = arcpy.mapping.Layer(gglrem_name + "_Detrended_Linear_Int_Ft")
                     arcpy.mapping.AddLayer(df, Layer_GGLREM_Int_Ft)
+                if "Float_Feet" in rems:
+                    flt_ft = Int(Raster(gglrem_name + "_Detrended_Linear_Float_m") * 3.28084)
+                    flt_ft.save(gglrem_name + "_Detrended_Linear_Flt_Ft")
+                    Layer_GGLREM_Flt_Ft = arcpy.mapping.Layer(gglrem_name + "_Detrended_Linear_Flt_Ft")
+                    arcpy.mapping.AddLayer(df, Layer_GGLREM_Flt_Ft)
+
         if "Polynomial 2nd" in detrend:
                 arcpy.PolylineToRaster_conversion(crosssections, "POLY2", "Poly2", "", "", "1")
-                arcpy.Minus_3d(lidar, "Poly2", "Detrended_Poly2_Float_m")
+                arcpy.Minus_3d(lidar, "Poly2", gglrem_name + "_Detrended_Poly2_Float_m")
                 if "Integer_Meters" in rems:
-                    int_m = Int(Raster("Detrended_Poly2_Float_m"))
-                    int_m.save("Detrended_Poly2_Int_m")
-                    Layer_GGLREM_Int_M = arcpy.mapping.Layer("Detrended_Poly2_Int_m")
+                    int_m = Int(Raster(gglrem_name + "_Detrended_Poly2_Float_m"))
+                    int_m.save(gglrem_name + "_Detrended_Poly2_Int_m")
+                    Layer_GGLREM_Int_M = arcpy.mapping.Layer(gglrem_name + "_Detrended_Poly2_Int_m")
                     arcpy.mapping.AddLayer(df, Layer_GGLREM_Int_M)
                 if "Integer_Decimeters" in rems:
-                    deci_m = (Int(Raster("Detrended_Poly2_Float_m") * 10 ))
-                    deci_m.save("Detrended_Poly2_Int_DeciM")
-                    Layer_GGLREM_DeciM = arcpy.mapping.Layer("Detrended_Poly2_Int_DeciM")
+                    deci_m = (Int(Raster(gglrem_name + "_Detrended_Poly2_Float_m") * 10 ))
+                    deci_m.save(gglrem_name + "_Detrended_Poly2_Int_DeciM")
+                    Layer_GGLREM_DeciM = arcpy.mapping.Layer(gglrem_name + "_Detrended_Poly2_Int_DeciM")
                     arcpy.mapping.AddLayer(df, Layer_GGLREM_DeciM)
                 if "Integer_Feet" in rems:
-                    int_ft = Int(Raster("Detrended_Poly2_Float_m") * 3.28084)
-                    int_ft.save("Detrended_Poly2_Int_Ft")
-                    Layer_GGLREM_Int_Ft = arcpy.mapping.Layer("Detrended_Poly2_Int_Ft")
+                    int_ft = Int(Raster(gglrem_name + "_Detrended_Poly2_Float_m") * 3.28084)
+                    int_ft.save(gglrem_name + "_Detrended_Poly2_Int_Ft")
+                    Layer_GGLREM_Int_Ft = arcpy.mapping.Layer(gglrem_name + "_Detrended_Poly2_Int_Ft")
                     arcpy.mapping.AddLayer(df, Layer_GGLREM_Int_Ft)
+                if "Float_Feet" in rems:
+                    flt_ft = Int(Raster(gglrem_name + "_Detrended_Poly2_Float_m") * 3.28084)
+                    flt_ft.save(gglrem_name + "_Detrended_Poly2_Flt_Ft")
+                    Layer_GGLREM_Flt_Ft = arcpy.mapping.Layer(gglrem_name + "_Detrended_Poly2_Flt_Ft")
+                    arcpy.mapping.AddLayer(df, Layer_GGLREM_Flt_Ft)
+
         if "Polynomial 3rd" in detrend:
                 arcpy.PolylineToRaster_conversion(crosssections, "POLY3", "Poly3", "", "", "1")
-                arcpy.Minus_3d(lidar, "Poly3", "Detrended_Poly3_Float_m")
+                arcpy.Minus_3d(lidar, "Poly3", gglrem_name + "_Detrended_Poly3_Float_m")
                 if "Integer_Meters" in rems:
-                    int_m = Int(Raster("Detrended_Poly3_Float_m"))
-                    int_m.save("Detrended_Poly3_Int_m")
-                    Layer_GGLREM_Int_M = arcpy.mapping.Layer("Detrended_Poly3_Int_m")
+                    int_m = Int(Raster(gglrem_name + "_Detrended_Poly3_Float_m"))
+                    int_m.save(gglrem_name + "_Detrended_Poly3_Int_m")
+                    Layer_GGLREM_Int_M = arcpy.mapping.Layer(gglrem_name + "_Detrended_Poly3_Int_m")
                     arcpy.mapping.AddLayer(df, Layer_GGLREM_Int_M)
                 if "Integer_Decimeters" in rems:
-                    deci_m = (Int(Raster("Detrended_Poly3_Float_m") * 10 ))
-                    deci_m.save("Detrended_Poly3_Int_DeciM")
-                    Layer_GGLREM_DeciM = arcpy.mapping.Layer("Detrended_Poly3_Int_DeciM")
+                    deci_m = (Int(Raster(gglrem_name + "_Detrended_Poly3_Float_m") * 10 ))
+                    deci_m.save(gglrem_name + "_Detrended_Poly3_Int_DeciM")
+                    Layer_GGLREM_DeciM = arcpy.mapping.Layer(gglrem_name + "_Detrended_Poly3_Int_DeciM")
                     arcpy.mapping.AddLayer(df, Layer_GGLREM_DeciM)
                 if "Integer_Feet" in rems:
-                    int_ft = Int(Raster("Detrended_Poly3_Float_m") * 3.28084)
-                    int_ft.save("Detrended_Poly3_Int_Ft")
-                    Layer_GGLREM_Int_Ft = arcpy.mapping.Layer("Detrended_Poly3_Int_Ft")
+                    int_ft = Int(Raster(gglrem_name + "_Detrended_Poly3_Float_m") * 3.28084)
+                    int_ft.save(gglrem_name + "_Detrended_Poly3_Int_Ft")
+                    Layer_GGLREM_Int_Ft = arcpy.mapping.Layer(gglrem_name + "_Detrended_Poly3_Int_Ft")
                     arcpy.mapping.AddLayer(df, Layer_GGLREM_Int_Ft)
+                if "Float_Feet" in rems:
+                    flt_ft = Int(Raster(gglrem_name + "_Detrended_Poly3_Float_m") * 3.28084)
+                    flt_ft.save(gglrem_name + "_Detrended_Poly3_Flt_Ft")
+                    Layer_GGLREM_Flt_Ft = arcpy.mapping.Layer(gglrem_name + "_Detrended_Poly3_Flt_Ft")
+                    arcpy.mapping.AddLayer(df, Layer_GGLREM_Flt_Ft)
+
         if "Polynomial 4th" in detrend:
                 arcpy.PolylineToRaster_conversion(crosssections, "POLY4", "Poly4", "", "", "1")
-                arcpy.Minus_3d(lidar, "Poly4", "Detrended_Poly4_Float_m")
+                arcpy.Minus_3d(lidar, "Poly4", gglrem_name + "_Detrended_Poly4_Float_m")
                 if "Integer_Meters" in rems:
-                    int_m = Int(Raster("Detrended_Poly4_Float_m"))
-                    int_m.save("Detrended_Poly4_Int_m")
-                    Layer_GGLREM_Int_M = arcpy.mapping.Layer("Detrended_Poly4_Int_m")
+                    int_m = Int(Raster(gglrem_name + "_Detrended_Poly4_Float_m"))
+                    int_m.save(gglrem_name + "_Detrended_Poly4_Int_m")
+                    Layer_GGLREM_Int_M = arcpy.mapping.Layer(gglrem_name + "_Detrended_Poly4_Int_m")
                     arcpy.mapping.AddLayer(df, Layer_GGLREM_Int_M)
                 if "Integer_Decimeters" in rems:
-                    deci_m = (Int(Raster("Detrended_Poly4_Float_m") * 10 ))
-                    deci_m.save("Detrended_Poly4_Int_DeciM")
-                    Layer_GGLREM_DeciM = arcpy.mapping.Layer("Detrended_Poly4_Int_DeciM")
+                    deci_m = (Int(Raster(gglrem_name + "_Detrended_Poly4_Float_m") * 10 ))
+                    deci_m.save(gglrem_name + "_Detrended_Poly4_Int_DeciM")
+                    Layer_GGLREM_DeciM = arcpy.mapping.Layer(gglrem_name + "_Detrended_Poly4_Int_DeciM")
                     arcpy.mapping.AddLayer(df, Layer_GGLREM_DeciM)
                 if "Integer_Feet" in rems:
-                    int_ft = Int(Raster("Detrended_Poly4_Float_m") * 3.28084)
-                    int_ft.save("Detrended_Poly4_Int_Ft")
-                    Layer_GGLREM_Int_Ft = arcpy.mapping.Layer("Detrended_Poly4_Int_Ft")
+                    int_ft = Int(Raster(gglrem_name + "_Detrended_Poly4_Float_m") * 3.28084)
+                    int_ft.save(gglrem_name + "_Detrended_Poly4_Int_Ft")
+                    Layer_GGLREM_Int_Ft = arcpy.mapping.Layer(gglrem_name + "_Detrended_Poly4_Int_Ft")
                     arcpy.mapping.AddLayer(df, Layer_GGLREM_Int_Ft)
+                if "Float_Feet" in rems:
+                    flt_ft = Int(Raster(gglrem_name + "_Detrended_Poly4_Float_m") * 3.28084)
+                    flt_ft.save(gglrem_name + "_Detrended_Poly4_Flt_Ft")
+                    Layer_GGLREM_Flt_Ft = arcpy.mapping.Layer(gglrem_name + "_Detrended_Poly4_Flt_Ft")
+                    arcpy.mapping.AddLayer(df, Layer_GGLREM_Flt_Ft)
 
         if "Polynomial 5th" in detrend:
                 arcpy.PolylineToRaster_conversion(crosssections, "POLY5", "Poly5", "", "", "1")
-                arcpy.Minus_3d(lidar, "Poly5", "Detrended_Poly5_Float_m")
+                arcpy.Minus_3d(lidar, "Poly5", gglrem_name + "_Detrended_Poly5_Float_m")
                 if "Integer_Meters" in rems:
-                    int_m = Int(Raster("Detrended_Poly5_Float_m"))
-                    int_m.save("Detrended_Poly5_Int_m")
-                    Layer_GGLREM_Int_M = arcpy.mapping.Layer("Detrended_Poly5_Int_m")
+                    int_m = Int(Raster(gglrem_name + "_Detrended_Poly5_Float_m"))
+                    int_m.save(gglrem_name + "_Detrended_Poly5_Int_m")
+                    Layer_GGLREM_Int_M = arcpy.mapping.Layer(gglrem_name + "_Detrended_Poly5_Int_m")
                     arcpy.mapping.AddLayer(df, Layer_GGLREM_Int_M)
                 if "Integer_Decimeters" in rems:
-                    deci_m = (Int(Raster("Detrended_Poly5_Float_m") * 10 ))
-                    deci_m.save("Detrended_Poly5_Int_DeciM")
-                    Layer_GGLREM_DeciM = arcpy.mapping.Layer("Detrended_Poly5_Int_DeciM")
+                    deci_m = (Int(Raster(gglrem_name + "_Detrended_Poly5_Float_m") * 10 ))
+                    deci_m.save(gglrem_name + "_Detrended_Poly5_Int_DeciM")
+                    Layer_GGLREM_DeciM = arcpy.mapping.Layer(gglrem_name + "_Detrended_Poly5_Int_DeciM")
                     arcpy.mapping.AddLayer(df, Layer_GGLREM_DeciM)
                 if "Integer_Feet" in rems:
-                    int_ft = Int(Raster("Detrended_Poly5_Float_m") * 3.28084)
-                    int_ft.save("Detrended_Poly5_Int_Ft")
-                    Layer_GGLREM_Int_Ft = arcpy.mapping.Layer("Detrended_Poly5_Int_Ft")
+                    int_ft = Int(Raster(gglrem_name + "_Detrended_Poly5_Float_m") * 3.28084)
+                    int_ft.save(gglrem_name + "_Detrended_Poly5_Int_Ft")
+                    Layer_GGLREM_Int_Ft = arcpy.mapping.Layer(gglrem_name + "_Detrended_Poly5_Int_Ft")
                     arcpy.mapping.AddLayer(df, Layer_GGLREM_Int_Ft)
+                if "Float_Feet" in rems:
+                    flt_ft = Int(Raster(gglrem_name + "_Detrended_Poly5_Float_m") * 3.28084)
+                    flt_ft.save(gglrem_name + "_Detrended_Poly5_Flt_Ft")
+                    Layer_GGLREM_Flt_Ft = arcpy.mapping.Layer(gglrem_name + "_Detrended_Poly5_Flt_Ft")
+                    arcpy.mapping.AddLayer(df, Layer_GGLREM_Flt_Ft)
 
         #Delete Unneeded Feature Classes
-        arcpy.Delete_management("Centerline")
+
+        arcpy.Delete_management("Lidar")
         arcpy.Delete_management("Linear")
         arcpy.Delete_management("Poly2")
         arcpy.Delete_management("Poly3")
@@ -701,3 +891,5 @@ class REM(object):
         arcpy.Delete_management("Poly5")
 
         return
+
+        
