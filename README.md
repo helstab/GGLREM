@@ -5,13 +5,14 @@
 
 ## Getting Started:
 
-- Ensure you have ArcGIS version 10.3 or newer.
+- Ensure you have ArcGIS version 10.3 or 10.6.
 - Download the toolbox and place it in the appropriate folder folder.
 
 ![gglremtool](https://user-images.githubusercontent.com/29985018/44349484-fb496e80-a451-11e8-8dd1-e9a31d1bb486.png)
 
 ## Report Issues
 
+This tool is a product of many google searches and trial and error. Keep in mind that there are likely bugs.
 If the user encounters any problems running the GGLREM tool please email Matt Helstab at jmhelstab@fs.fed.us.
 
 ## GGLREM Tool
