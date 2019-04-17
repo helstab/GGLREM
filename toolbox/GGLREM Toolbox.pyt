@@ -370,7 +370,7 @@ class CenterlineStations(object):
             parameters[4].parameterType = "Required"
         else:
             parameters[4].enabled = False
-            parameters[4].parameterType = "Optional"
+            parameters[4].parameterType = "Disabled"
             parameters[4].value = "1"
 
 
@@ -684,7 +684,25 @@ class REM(object):
         return True
 
     def updateParameters(self, parameters):
+        #if parameters[2].values = [0]:
+         #   parameters[3].enabled = True
+          #  parameters[3].parameterType = "Required"
 
+        #else:
+         #   parameters[3].enabled = False
+          #  parameters[3].parameterType = "Disabled"
+
+        #else:
+         #   parameters[3].enabled = False
+          #  parameters[3].parameterType = "Disabled"
+
+        #if parameters[2].values = "Custom"
+         #   parameters[4].enabled = True
+          #  parameters[4].parameterType = "Required"
+
+        #else:
+         #   parameters[4].enabled = False
+          #  parameters[4].parameterType = "Disabled"
         return
 
     def updateMessages(self, parameters):
@@ -733,7 +751,7 @@ class REM(object):
                     Layer_GGLREM_Int_Ft = arcpy.mapping.Layer(gglrem_name + "_Detrended_Custom_Int_Ft")
                     arcpy.mapping.AddLayer(df, Layer_GGLREM_Int_Ft)
                 if "Float_Feet" in rems:
-                    flt_ft = Int(Raster(gglrem_name + "_Detrended_Custom_Float_m") * 3.28084)
+                    flt_ft = Raster(gglrem_name + "_Detrended_Custom_Float_m") * 3.28084
                     flt_ft.save(gglrem_name + "_Detrended_Custom_Flt_Ft")
                     Layer_GGLREM_Flt_Ft = arcpy.mapping.Layer(gglrem_name + "_Detrended_Custom_Flt_Ft")
                     arcpy.mapping.AddLayer(df, Layer_GGLREM_Flt_Ft)
@@ -756,7 +774,7 @@ class REM(object):
                     Layer_GGLREM_Int_Ft = arcpy.mapping.Layer(gglrem_name + "_Detrended_LiDAR_Int_Ft")
                     arcpy.mapping.AddLayer(df, Layer_GGLREM_Int_Ft)
                 if "Float_Feet" in rems:
-                    flt_ft = Int(Raster(gglrem_name + "_Detrended_LiDAR_Float_m") * 3.28084)
+                    flt_ft = Raster(gglrem_name + "_Detrended_LiDAR_Float_m") * 3.28084
                     flt_ft.save(gglrem_name + "_Detrended_LiDAR_Flt_Ft")
                     Layer_GGLREM_Flt_Ft = arcpy.mapping.Layer(gglrem_name + "_Detrended_LiDAR_Flt_Ft")
                     arcpy.mapping.AddLayer(df, Layer_GGLREM_Flt_Ft)
@@ -780,7 +798,7 @@ class REM(object):
                     Layer_GGLREM_Int_Ft = arcpy.mapping.Layer(gglrem_name + "_Detrended_Linear_Int_Ft")
                     arcpy.mapping.AddLayer(df, Layer_GGLREM_Int_Ft)
                 if "Float_Feet" in rems:
-                    flt_ft = Int(Raster(gglrem_name + "_Detrended_Linear_Float_m") * 3.28084)
+                    flt_ft = Raster(gglrem_name + "_Detrended_Linear_Float_m") * 3.28084
                     flt_ft.save(gglrem_name + "_Detrended_Linear_Flt_Ft")
                     Layer_GGLREM_Flt_Ft = arcpy.mapping.Layer(gglrem_name + "_Detrended_Linear_Flt_Ft")
                     arcpy.mapping.AddLayer(df, Layer_GGLREM_Flt_Ft)
@@ -804,7 +822,7 @@ class REM(object):
                     Layer_GGLREM_Int_Ft = arcpy.mapping.Layer(gglrem_name + "_Detrended_Poly2_Int_Ft")
                     arcpy.mapping.AddLayer(df, Layer_GGLREM_Int_Ft)
                 if "Float_Feet" in rems:
-                    flt_ft = Int(Raster(gglrem_name + "_Detrended_Poly2_Float_m") * 3.28084)
+                    flt_ft = Raster(gglrem_name + "_Detrended_Poly2_Float_m") * 3.28084
                     flt_ft.save(gglrem_name + "_Detrended_Poly2_Flt_Ft")
                     Layer_GGLREM_Flt_Ft = arcpy.mapping.Layer(gglrem_name + "_Detrended_Poly2_Flt_Ft")
                     arcpy.mapping.AddLayer(df, Layer_GGLREM_Flt_Ft)
@@ -828,7 +846,7 @@ class REM(object):
                     Layer_GGLREM_Int_Ft = arcpy.mapping.Layer(gglrem_name + "_Detrended_Poly3_Int_Ft")
                     arcpy.mapping.AddLayer(df, Layer_GGLREM_Int_Ft)
                 if "Float_Feet" in rems:
-                    flt_ft = Int(Raster(gglrem_name + "_Detrended_Poly3_Float_m") * 3.28084)
+                    flt_ft = Raster(gglrem_name + "_Detrended_Poly3_Float_m") * 3.28084
                     flt_ft.save(gglrem_name + "_Detrended_Poly3_Flt_Ft")
                     Layer_GGLREM_Flt_Ft = arcpy.mapping.Layer(gglrem_name + "_Detrended_Poly3_Flt_Ft")
                     arcpy.mapping.AddLayer(df, Layer_GGLREM_Flt_Ft)
@@ -852,7 +870,7 @@ class REM(object):
                     Layer_GGLREM_Int_Ft = arcpy.mapping.Layer(gglrem_name + "_Detrended_Poly4_Int_Ft")
                     arcpy.mapping.AddLayer(df, Layer_GGLREM_Int_Ft)
                 if "Float_Feet" in rems:
-                    flt_ft = Int(Raster(gglrem_name + "_Detrended_Poly4_Float_m") * 3.28084)
+                    flt_ft = Raster(gglrem_name + "_Detrended_Poly4_Float_m") * 3.28084
                     flt_ft.save(gglrem_name + "_Detrended_Poly4_Flt_Ft")
                     Layer_GGLREM_Flt_Ft = arcpy.mapping.Layer(gglrem_name + "_Detrended_Poly4_Flt_Ft")
                     arcpy.mapping.AddLayer(df, Layer_GGLREM_Flt_Ft)
@@ -876,13 +894,12 @@ class REM(object):
                     Layer_GGLREM_Int_Ft = arcpy.mapping.Layer(gglrem_name + "_Detrended_Poly5_Int_Ft")
                     arcpy.mapping.AddLayer(df, Layer_GGLREM_Int_Ft)
                 if "Float_Feet" in rems:
-                    flt_ft = Int(Raster(gglrem_name + "_Detrended_Poly5_Float_m") * 3.28084)
+                    flt_ft = Raster(gglrem_name + "_Detrended_Poly5_Float_m") * 3.28084
                     flt_ft.save(gglrem_name + "_Detrended_Poly5_Flt_Ft")
                     Layer_GGLREM_Flt_Ft = arcpy.mapping.Layer(gglrem_name + "_Detrended_Poly5_Flt_Ft")
                     arcpy.mapping.AddLayer(df, Layer_GGLREM_Flt_Ft)
 
         #Delete Unneeded Feature Classes
-
         arcpy.Delete_management("Lidar")
         arcpy.Delete_management("Linear")
         arcpy.Delete_management("Poly2")
@@ -891,5 +908,3 @@ class REM(object):
         arcpy.Delete_management("Poly5")
 
         return
-
-        
