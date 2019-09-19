@@ -5,7 +5,7 @@
 
 ## Getting Started:
 
-- Should run on ArcGIS version 10.3 to 10.6
+- Should run on ArcGIS versions 10.3 to 10.6
 - Download the toolbox and place it in the appropriate folder folder.
 
 ![gglremtool](https://user-images.githubusercontent.com/29985018/44349484-fb496e80-a451-11e8-8dd1-e9a31d1bb486.png)
