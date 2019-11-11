@@ -1,4 +1,6 @@
 # Geomorphic Grade Line Relative Elevation Model
+## Version 2
+### Last Updated: 11/10/2019
 ### ArcMap Python Toolbox
 
 ![gglrem_thumb](https://user-images.githubusercontent.com/29985018/44356381-0e653a00-a464-11e8-91fb-788c0ebc08dd.png)
