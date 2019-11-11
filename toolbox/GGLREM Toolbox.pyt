@@ -1060,8 +1060,8 @@ class Update(object):
 
         arcpy.JoinField_management(in_zone_data, zone_field, out_table, zone_field, ["SUM", "MEAN", "STD", "COUNT"])
         arcpy.CalculateField_management(in_zone_data, "SUM", 'round(!SUM!, 0)', "PYTHON")
-        arcpy.CalculateField_management(in_zone_data, "STD", 'round(!STD!, 1)', "PYTHON_9.3")
-        arcpy.CalculateField_management(in_zone_data, "MEAN", 'round(!MEAN!, 1)', "PYTHON_9.3")
+        arcpy.CalculateField_management(in_zone_data, "STD", 'round(!STD!, 1)', "PYTHON")
+        arcpy.CalculateField_management(in_zone_data, "MEAN", 'round(!MEAN!, 1)', "PYTHON")
         arcpy.AddMessage("Go Beavs!!!")
         #arcpy.AddField_management(in_zone_data, "Adjusted", 'LONG' )
 
