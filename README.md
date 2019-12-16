@@ -7,15 +7,16 @@
 
 ## Getting Started:
 
-- Should run on ArcGIS versions 10.3 to 10.6
-- Download the toolbox and place it in the appropriate folder folder.
+- Should run on ArcGIS versions 10.3 to 10.6 (Assumes python version 2)
+- Download the toolbox and place it in  appropriate folder.
+- The README has not been updated since the release of Version 2.0. Please see 
 
 ![gglremtool](https://user-images.githubusercontent.com/29985018/44349484-fb496e80-a451-11e8-8dd1-e9a31d1bb486.png)
 
 ## Report Issues
 
 This tool is a product of many google searches and trial and error. Keep in mind that there are likely bugs.
-If the user encounters any problems running the GGLREM tool please email Matt Helstab at jmhelstab@fs.fed.us.
+If the user encounters any problems running the GGLREM tool please email Matt Helstab at joseph.helstab@usda.gov.
 
 ## GGLREM Tool
 
