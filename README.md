@@ -7,12 +7,11 @@
 
 ## Getting Started:
 
-- Should run on ArcGIS all 10.x ; built on Python 2.7
-- Download the toolbox zip and unzip in your project folder.
-- Version 2.0 adds Steps 5 & 6 as an experimental Cut/Fill volume calculator. 
+- Should run on ArcGIS 10.x ; built on Python 2.7
+- Will not run in ArcGIS Pro ; built on Python 3.x
+- Download the toolbox zip and unzip contents to your project folder.
+- Version 2.0 adds Steps 5 & 6 as an experimental Cut/Fill volume calculator. It is likely buggy.
 - The rest of this README has not been updated since the release of Version 2.0.  
-
-# If you have a problem with the tool, FIX IT! That's what Open Source is all about.
 
 
 ![gglremtool](https://user-images.githubusercontent.com/29985018/44349484-fb496e80-a451-11e8-8dd1-e9a31d1bb486.png)
