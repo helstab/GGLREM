@@ -1,5 +1,5 @@
 # Geomorphic Grade Line Relative Elevation Model
-## Version 2
+## Version 2.0
 ### Last Updated: 11/10/2019
 ### ArcMap Python Toolbox
 
@@ -7,9 +7,10 @@
 
 ## Getting Started:
 
-- Should run on ArcGIS versions 10.3 to 10.6 (Assumes python version 2)
-- Download the toolbox and place it in  appropriate folder.
-- The README has not been updated since the release of Version 2.0. Please see 
+- Should run on ArcGIS all 10.x ; built on Python 2.7
+- Download the toolbox zip and unzip in your project folder.
+- The rest of this README has not been updated since the release of Version 2.0.  
+- Version 2.0 adds Steps 5 & 6 as an experimental Cut/Fill volume calculator. 
 
 ![gglremtool](https://user-images.githubusercontent.com/29985018/44349484-fb496e80-a451-11e8-8dd1-e9a31d1bb486.png)
 
