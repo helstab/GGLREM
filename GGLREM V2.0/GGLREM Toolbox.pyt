@@ -1,10 +1,10 @@
 #-------------------------------------------------------------------------------
-# Created:     02/06/2018
-# ArcGIS version: 10.5.1
+#
+# ArcGIS version: 10.7
 # Python version: 2.7
-# GGLREM version: 2.0.0
+# GGLREM version: 2.1
 # First release: 08/20/2018
-#Latest release: 11/09/2019
+# Latest release: 05/03/2019
 
 # Name:        GGL REM Toolbox
 # Purpose: Series of tools to build a Relative Elevation Model (REM)
