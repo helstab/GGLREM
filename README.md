@@ -6,16 +6,16 @@
 ![gglrem_thumb](https://user-images.githubusercontent.com/29985018/44356381-0e653a00-a464-11e8-91fb-788c0ebc08dd.png)
 
 ## Version 2.1 Updates!!
--The Step 6 should now work without issue. 
--The tool will generate volumes for each Cut/Fill polygon with a unique ID.
--User should be able to use any polygon feature class or shapefile, not just product from Step 5.
+- The Step 6 should now work without issue. 
+- The tool will generate volumes for each Cut/Fill polygon with a unique ID.
+- User should be able to use any polygon feature class or shapefile, not just product from Step 5.
 
 ## Getting Started:
 
 - Should run on ArcGIS 10.x ; built on Python 2.7
-- Will not run in ArcGIS Pro ; built on Python 3.x
+- Will not run in ArcGIS Pro ; built on Python 3.x 
 - Download the toolbox zip and unzip contents to your project folder.
-- Version 2.0 adds Steps 5 & 6 as an experimental Cut/Fill volume calculator. It is likely buggy.
+- Version 2.0 adds Steps 5 & 6 as an experimental Cut/Fill volume calculator. 
 - The rest of this README has not been updated since the release of Version 2.0.  
 
 
