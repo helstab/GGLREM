@@ -1,9 +1,14 @@
 # Geomorphic Grade Line Relative Elevation Model
-## Version 2.0
-### Last Updated: 11/10/2019
+## Version 2.1
+### Last Updated: 05/03/2020
 ### ArcMap Python Toolbox
 
 ![gglrem_thumb](https://user-images.githubusercontent.com/29985018/44356381-0e653a00-a464-11e8-91fb-788c0ebc08dd.png)
+
+## Version 2.1 Updates!!
+-The Step 6 should now work without issue. 
+-The tool will generate volumes for each Cut/Fill polygon with a unique ID.
+-User should be able to use any polygon feature class or shapefile, not just product from Step 5.
 
 ## Getting Started:
 
