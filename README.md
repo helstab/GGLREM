@@ -1,19 +1,25 @@
 # Geomorphic Grade Line Relative Elevation Model
+## Version 2.0
+### Last Updated: 11/10/2019
 ### ArcMap Python Toolbox
 
 ![gglrem_thumb](https://user-images.githubusercontent.com/29985018/44356381-0e653a00-a464-11e8-91fb-788c0ebc08dd.png)
 
 ## Getting Started:
 
-- Should run on ArcGIS versions 10.3 to 10.6
-- Download the toolbox and place it in the appropriate folder folder.
+- Should run on ArcGIS 10.x ; built on Python 2.7
+- Will not run in ArcGIS Pro ; built on Python 3.x
+- Download the toolbox zip and unzip contents to your project folder.
+- Version 2.0 adds Steps 5 & 6 as an experimental Cut/Fill volume calculator. It is likely buggy.
+- The rest of this README has not been updated since the release of Version 2.0.  
+
 
 ![gglremtool](https://user-images.githubusercontent.com/29985018/44349484-fb496e80-a451-11e8-8dd1-e9a31d1bb486.png)
 
 ## Report Issues
 
 This tool is a product of many google searches and trial and error. Keep in mind that there are likely bugs.
-If the user encounters any problems running the GGLREM tool please email Matt Helstab at jmhelstab@fs.fed.us.
+If the user encounters any problems running the GGLREM tool please email Matt Helstab at joseph.helstab@usda.gov.
 
 ## GGLREM Tool
 
