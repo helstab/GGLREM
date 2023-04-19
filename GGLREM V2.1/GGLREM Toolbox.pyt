@@ -621,7 +621,7 @@ class REM(object):
 
         #Third parameter
         gglLIST = arcpy.Parameter(
-            displayName = "Select Values/Model to Construct Relative Eleavtion Model",
+            displayName = "Select Values/Model to Construct Relative Elevation Model",
             name = "GglList",
             datatype = "GPString",
             parameterType = "Required",
@@ -1037,11 +1037,16 @@ class Update(object):
         target = target_np * -1
         out_table = "Volumes_" + zone_poly
         desc = arcpy.Describe(zone_poly)
-        arcpy.AddMessage(desc)
+        arcpy.AddMessage("Input polygon layer: " + zone_poly)
         gdb = desc.path
-        arcpy.AddMessage(gdb)
-        dir = os.path.dirname(gdb)
-        arcpy.AddMessage(dir)
+        arcpy.AddMessage("Input polygon layer geodatabase: " +gdb)
+        folder = os.path.dirname(gdb)
+        arcpy.AddMessage("Folder with input polygon geodatabase is in: " + folder)
+
+        # Trap folder name issue, expecially if forked from github which introduces a hyphen
+        if "-" in folder:
+            arcpy.AddError("Your folder path contains a hyphen character, this causes the ExtractByMask to fail! Rename your folder to something simpler, aborting processing!")
+            return
         csv = out_table + ".csv"
         output_raster = gdb + "/"+ ggl_raster + "_ADJUSTED"
 
@@ -1050,39 +1055,32 @@ class Update(object):
         arcpy.env.workspace = gdb
         mxd = arcpy.mapping.MapDocument("CURRENT")
         df = arcpy.mapping.ListDataFrames(mxd)[0]
-        arcpy.AddMessage(df)
+        arcpy.AddMessage("Processing data in map " + df.name)
 
         arcpy.AddMessage("Gathering Relative Elevations...")
-        #"Clip" the GGLREM to the Zone Polys
-        zone_mask = ExtractByMask (ggl_raster, zone_poly)
-        #Adject the clipped GGLREM ta target relative elevation
+
+        # "Clip" the GGLREM to the Zone Polys
+        zone_mask = ExtractByMask(ggl_raster, zone_poly)
+
+        # Adjust the clipped GGLREM to target relative elevation
         adj_ggl = zone_mask + target
-        #adj_raster = arcpy.gp.Plus_sa(in_value_raster, t2, output_raster)
-        #adj_raster.save(in_value_raster + "_ADJUSTED")
+
+        # Save adjusted raster and add to map
+        adj_ggl.save(output_raster)
+        arcpy.MakeRasterLayer_management(output_raster, "ADJUSTED")
 
         #ZonalStatisticsAsTable (in_zone_data, zone_field, in_value_raster, out_table, {ignore_nodata}, {statistics_type})
         arcpy.AddMessage("Applying Zonal Stats...")
         arcpy.sa.ZonalStatisticsAsTable(zone_poly, zone_field, adj_ggl, out_table, 'DATA' , 'ALL')
-        arcpy.AddMessage("Appending Feature...")
-        #Layer_Target_REM = arcpy.mapping.Layer(ggl_raster + "_ADJUSTED" + target_re + "m")
-        #Layer_Volume_Table = arcpy.mapping.Layer(out_table)
-        #arcpy.mapping.AddLayer(df, Layer_Volume_Table)
+        arcpy.AddMessage("Appending zonal statistics data to cut/fill polygons...")
 
         #Overwrite existing Volumes
         arcpy.DeleteField_management(zone_poly, ["MEAN", "STD", "SUM", "COUNT"])
 
-        #arcpy.AddJoin_management (in_zone_data, zone_field, out_table, zone_field, 'KEEP_ALL')
-
         #Join zonal statistics to zone polygon
         arcpy.JoinField_management(zone_poly, zone_field, out_table, zone_field, ["SUM", "MEAN", "STD", "COUNT"])
-        #arcpy.CalculateField_management(in_zone_data, "SUM", 'round(!SUM!, 0)', "PYTHON")
-        #arcpy.CalculateField_management(in_zone_data, "STD", 'round(!STD!, 1)', "PYTHON")
-        #arcpy.CalculateField_management(in_zone_data, "MEAN", 'round(!MEAN!, 1)', "PYTHON")
-        #arcpy.CalculateField_management(in_zone_data, "MEAN", 'round(!MEAN!, 1)', "PYTHON_9.3")
-        arcpy.AddMessage("Go Beavs!!!")
-        #arcpy.AddField_management(in_zone_data, "Adjusted", 'LONG' )
 
-        #arcpy.CalculateField_management(in_zone_data, "Adjusted", expression, "PYTHON_9.3")
+        # Create a CSV export of output table
         arcpy.AddMessage("Creating CSV...")
-        arcpy.TableToTable_conversion(out_table, dir, csv)
+        arcpy.TableToTable_conversion(out_table, folder, csv)
         return
