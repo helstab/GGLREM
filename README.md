@@ -32,7 +32,7 @@ If the user encounters any problems running the GGLREM tool please email Matt He
 
   #### REQUIRED: DEM 
 
-  This first steps ensures that the users workspace and coordinate system is correctly set before creating a polyline feature class. The     user must then start an edit session and draw their valley centerline. The RouteID field in the Centerline polyline must be named.   
+  This first steps ensures that the users workspace and coordinate system is correctly set before creating a polyline feature class. The user must then start an edit session and draw their <ins>valley centerline</ins>. The RouteID field in the Centerline polyline must be named.   
   
   ![step1](https://user-images.githubusercontent.com/29985018/44349907-00f38400-a453-11e8-972f-eb3131e190ed.png)
 
